@@ -1,37 +1,74 @@
-import smtplib
-import ssl
+""" import smtplib
 from email.message import EmailMessage
+from content import template
 
-email_subject = "Email de prueba desde Python"
-sender_email_address = "labsecureemailtest@sucresecure.com"
-receiver_email_address = "joalrope@gmail.com"
-email_smtp = "mail.sucresecure.com"
+smtp_server = "mail.sucresecure.com"
+smtp_port = 465
+
+email_emitter = "labsecureemailtest@sucresecure.com"
 email_password = "nixcmc6Dkt5Ay2Y"
 
-# Create an email message object
+receiver_email = "joalrope@gmail.com"
+
 message = EmailMessage()
 
-# Configure email headers
-message['Subject'] = email_subject
-message['From'] = sender_email_address
-message['To'] = receiver_email_address
+message['Subject'] = "Email de prueba desde Python"
+message['From'] = email_emitter
+message['To'] = receiver_email
 
-# Set email body text
-message.set_content("Hello from Python!")
+message.set_content(template, subtype="html")
 
-# Set smtp server and port
-server = smtplib.SMTP_SSL('mail.sucresecure.com:465')
-
-# Identify this client to the SMTP server
+server = smtplib.SMTP_SSL(f'{smtp_server}:{smtp_port}')
 server.ehlo()
-
-# Login to email account
-server.login(sender_email_address, email_password)
-
-# Send email
+server.login(email_emitter, email_password)
 server.send_message(message)
-
-# Close connection to server
 server.quit()
+print("Envio exitoso") """
 
-print("exito")
+# import all necessary components
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+
+smtp_server = "mail.sucresecure.com"
+smtp_port = 465
+
+sender_email = "labsecureemailtest@sucresecure.com"
+
+email_password = "nixcmc6Dkt5Ay2Y"
+receiver_email = "joalrope@gmail.com"
+
+message = MIMEMultipart("alternative")
+message["Subject"] = "CID image test"
+message["From"] = sender_email
+message["To"] = receiver_email
+
+# write the HTML part
+html = """\
+<html>
+ <body>
+   <img src="cid:Mailtrapimage">
+ </body>
+</html>
+"""
+
+part = MIMEText(html, "html")
+message.attach(part)
+
+# We assume that the image file is in the same directory that you run your Python script from
+fp = open('Escanear.jpeg', 'rb')
+image = MIMEImage(fp.read())
+fp.close()
+
+# Specify the  ID according to the img src in the HTML part
+image.add_header('Content-ID', '<Mailtrapimage>')
+message.attach(image)
+
+# send your email
+with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+    server.login(sender_email, email_password)
+    server.sendmail(
+        sender_email, receiver_email, message.as_string()
+    )
+print('Sent')
