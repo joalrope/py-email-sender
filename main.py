@@ -21,7 +21,7 @@ message["To"] = receiver_email
 part = MIMEText(template, "html")
 message.attach(part)
 
-fp = open('Escanear.jpeg', 'rb')
+fp = open('joalrope200x200.png', 'rb')
 image = MIMEImage(fp.read())
 fp.close()
 
